@@ -1,0 +1,2 @@
+# Sushi-Bot
+Discord bot
