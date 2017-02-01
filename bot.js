@@ -1,27 +1,32 @@
-var Discordie = require('discordie');
+const Discord = require("discord.js");
+const client = new Discord.Client();
 
+var bot = require("discord-music-bot");
 
-const Events = Discordie.Events;
-const client = new Discordie();
+var serverName = "bot testing";
+var textChannelName = "tester";
+var voiceChannelName = "General";
+var botToken = "Mjc2MjA3MTQzOTYxNzU1NjQ4.C3ORXQ.nXFQh5Ad6PP2qPktNtan6AEEpO8";
+bot.run(serverName, textChannelName, voiceChannelName, botToken);
 
-client.connect({
-	token: 'Mjc2MjA3MTQzOTYxNzU1NjQ4.C3L3uA.Di2UZA-Y5MeX3AaGG89cDLBKT9c'
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.username}!`);
+  
+});
+
+client.on('message', msg => {
+  if (msg.content === 'ping') {
+    msg.reply('Pong!');
 	
+  }
 });
 
-client.Dispatcher.on(Events.GATEWAY_READY, e =>{
-	console.log('Connected as: ' + client.User.username);
-});
-
-client.Dispatcher.on(Events.MESSAGE_CREATE, e =>{
-	if (e.message.content == 'PING'){
-		e.message.channel.sendMessage('PONG');
-	}
-});
-
+client.login('Mjc2MjA3MTQzOTYxNzU1NjQ4.C3L3uA.Di2UZA-Y5MeX3AaGG89cDLBKT9c');
+        
 
 // Mjc2MjA3MTQzOTYxNzU1NjQ4.C3L3uA.Di2UZA-Y5MeX3AaGG89cDLBKT9c
 
 
 
-
+//to type normally in a channel:
+// msg.channel.sendMessage('pong');
