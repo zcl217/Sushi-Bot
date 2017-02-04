@@ -1,8 +1,6 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-var bot = require("discord-music-bot");
-
 var serverName = "bot testing";
 var textChannelName = "tester";
 var voiceChannelName = "General";
