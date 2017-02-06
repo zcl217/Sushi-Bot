@@ -18,6 +18,7 @@ const docClient = new AWS.DynamoDB.DocumentClient()
 const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"]
 
 var levelUpReq = [];
+var channel;
 
 fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 	if (err){
@@ -28,6 +29,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		for (let a = 0; a < 10; a++){
 			levelUpReq[a] = obj[a];
 		}
+		channel = obj.temp;
 		console.log(levelUpReq);
 		client.login(obj.token);
 		
@@ -60,7 +62,9 @@ client.on('message', function(message) {
 	//bind it to certain channels?
 	
 	console.log(message.author);
-	if (message.author.id.localeCompare("276207143961755648") !== 0){
+	console.log(typeof(message.author.id));
+	console.log(message.channel.id + " " + channel);
+	if (message.channel.id.localeCompare(channel) === 0 && message.author.id.localeCompare("276207143961755648") !== 0){
         if (message.channel.type === "dm") {
                 console.log("(Private) " + `${message.author.username}: ${message.content}`);
         } else {
