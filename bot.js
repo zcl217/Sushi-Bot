@@ -53,11 +53,14 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-	  if (msg.content === 'Give Me Sushi' || msg.content === 'Sushi Please') {
-		  
+	  if (msg.content.toLowerCase() === 'give me sushi' || msg.content.toLowerCase() === 'sushi please') {
 		
 		msg.reply(sushi[Math.floor(Math.random()*7)]);
 		
+	  }
+	  
+	  if (msg.content.toLowerCase() === 'what\'s hangout utopia?'){
+		msg.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\nIf you'd like to learn more, then check out #news-and-events  for all the fun activities! If you want to get involved then check out #applications  We have a lot of a roles that you def would be able to apply for!");
 	  }
 });
 
@@ -71,12 +74,12 @@ client.on('message', function(message) {
 	//console.log(message.channel);	
 	//bind it to certain channels?
 	
-	console.log(message.author);
-	console.log(typeof(message.author.id));
-	console.log(message.channel.id + " " + channel);
+	//console.log(message.author);
+	//console.log(typeof(message.author.id));
+	//console.log(message.channel.id + " " + channel);
 	if (message.channel.id.localeCompare(channel) === 0 && message.author.id.localeCompare("276207143961755648") !== 0){
         if (message.channel.type === "dm") {
-                console.log("(Private) " + `${message.author.username}: ${message.content}`);
+                console.log("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. You ain't gon get no exp unless you talk in the main chat. :^)");
         } else {
 			//if not a PM, then add it towards the user's word count.
 			
@@ -86,7 +89,7 @@ client.on('message', function(message) {
 					"userID": message.author.id
 				}
 			}
-			console.log("before docClient");
+		//	console.log("before docClient");
 			
 			var exp = 0;
 			docClient.get(params, function(err, data){
@@ -96,7 +99,7 @@ client.on('message', function(message) {
 					
 				}else{
 					//we got it
-					console.log("found");
+				//	console.log("found");
 					
 					if (data.Item == undefined){
 						//create new table entry
@@ -125,7 +128,7 @@ client.on('message', function(message) {
 					//	exp = data.exp;
 						let exp = message.content.length + curUser.exp;
 						let lvl = curUser.lvl;
-						console.log(exp + " " + lvl + " " + levelUpReq[lvl]);
+					//	console.log(exp + " " + lvl + " " + levelUpReq[lvl]);
 						if (exp >= levelUpReq[lvl]){
 							console.log("Level up!");
 							lvl++;
@@ -162,8 +165,7 @@ client.on('message', function(message) {
 						//update entry here
 						
 					}
-					console.log(data);
-					//extract the # in database, add new #, put it back in
+					//console.log(data);
 				}
 			});
 			
