@@ -24,7 +24,8 @@ const sushi = [
 	"Dynamite Sushi Roll on the dial! It has an explosion of flavors!",
 	"Dragon Sushi Roll will def exceed your expectations, try it now!",
 	"Looking for a crunch?! Well here's a Sushi Crunchy Roll!",
-	"You want a party in your mouth!? Rainbow Sushi Roll will blast you with flavor!"
+	"You want a party in your mouth!? Rainbow Sushi Roll will blast you with flavor!",
+	"Oh noo! Bad luck for you! >:D You will now eat a POISON SUSHI Roll! MWAHahaha.... I'm just kidding c:"
 ]
 
 var levelUpReq = [];
@@ -59,7 +60,7 @@ client.on('message', msg => {
 		
 	  }
 	  
-	  if (msg.content.toLowerCase() === 'what\'s hangout utopia?'){
+	  if (msg.content.toLowerCase() === "what's hangout utopia?"){
 		msg.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\nIf you'd like to learn more, then check out #news-and-events  for all the fun activities! If you want to get involved then check out #applications  We have a lot of a roles that you def would be able to apply for!");
 	  }
 });
