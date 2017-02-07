@@ -7,6 +7,15 @@ const fs = require('fs');
 const AWS = require("aws-sdk");
 const Discord = require("discord.js");
 const client = new Discord.Client();
+var mBot = require("discord-music-bot");
+
+var serverName = "Hangout Utopia";
+var textChannelName = "bot-command-test";
+var voiceChannelName = "ADMIN Meeting";
+var aliasesFile = "aliases";
+var botToken;
+
+
 
 AWS.config.update({
   region: "us-west-2",
@@ -30,6 +39,8 @@ const sushi = [
 
 var levelUpReq = [];
 var channel;
+var newsAndEvents;
+var applications;
 
 fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 	if (err){
@@ -41,28 +52,24 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 			levelUpReq[a] = obj[a];
 		}
 		channel = obj.chatChannel;
+		newsAndEvents = obj.news;
+		applications = obj.applications;
 		console.log(levelUpReq);
+		botToken = obj.token;
 		client.login(obj.token);
 		
 		
+		mBot.run(serverName, textChannelName, voiceChannelName, aliasesFile, botToken);
+		
+		
 	}
+	
 }); 
 
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.username}!`);
-});
-
-client.on('message', msg => {
-	  if (msg.content.toLowerCase() === 'give me sushi' || msg.content.toLowerCase() === 'sushi please') {
-		
-		msg.reply(sushi[Math.floor(Math.random()*8)]);
-		
-	  }
-	  
-	  if (msg.content.toLowerCase() === "what is hangout utopia?"){
-		msg.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\nIf you'd like to learn more, then check out #news-and-events  for all the fun activities! If you want to get involved then check out #applications  We have a lot of a roles that you def would be able to apply for!");
-	  }
+ 
 });
 
 //char limit is 2k
@@ -72,135 +79,153 @@ client.on('message', msg => {
 //user id is a string not int
 
 client.on('message', function(message) {
-	//console.log(message.channel);	
-	//bind it to certain channels?
 	
-	//console.log(message.author);
-	//console.log(typeof(message.author.id));
-	//console.log(message.channel.id + " " + channel);
-	if (message.channel.id.localeCompare(channel) === 0 && message.author.id.localeCompare("276207143961755648") !== 0){
-        if (message.channel.type === "dm") {
-                console.log("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. You ain't gon get no exp unless you talk in the main chat. :^)");
-        } else {
-			//if not a PM, then add it towards the user's word count.
+	//we never want the bot to reply to anything it says
+	if (message.author.id.localeCompare("276207143961755648") !== 0){
+		
+		
+		if (message.content.toLowerCase() === 'give me sushi' || message.content.toLowerCase() === 'sushi please') {
+			message.reply(sushi[Math.floor(Math.random()*8)]);
+
+		}else if (message.content.toLowerCase() === "what is hangout utopia?"){
+			message.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\n\n If you'd like to learn more, then check out " + `${client.channels.get(newsAndEvents)}` + " for all the fun activities! If you want to get involved then check out " + `${client.channels.get(applications)}` + ". We have a lot of a roles that you def would be able to apply for!");
 			
+		}else if (message.content.toLowerCase() === "!level"){
 			let params = {
 				TableName: "discordBot",
 				Key:{
 					"userID": message.author.id
 				}
-			}
-		//	console.log("before docClient");
-			
-			var exp = 0;
-			docClient.get(params, function(err, data){
-				if (err){
-					//does this mean it doesn't exist?
+			};
+
+			//look up a user's level. if the user never talked before, create new entry
+			docClient.get(params, function(err, data) {
+				if (err) {
 					console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-					
-				}else{
-					//we got it
-				//	console.log("found");
+				} else {
+					console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+					console.log(data);
 					
 					if (data.Item == undefined){
-						//create new table entry
-						
-						let newID = {
-							TableName:"discordBot",
-							Item:{
-								"userID": message.author.id,
-								"lvl": 0,
-								"exp": 0
-							}
-						}
-						
-						docClient.put(newID, function(err, data){
-							  if (err) {
-								console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-							} else {
-								console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
-							}
-						});
-						
+								//create new table entry
+								
+								let newID = {
+									TableName:"discordBot",
+									Item:{
+										"userID": message.author.id,
+										"lvl": 0,
+										"exp": 0
+									}
+								}
+								
+								docClient.put(newID, function(err, data){
+									  if (err) {
+										console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+									} else {
+										console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
+									}
+								});
+								message.reply("You are currently a level 0 :sushi:");
+					}else{
+						message.reply("You are currently a level " + data.Item.lvl + " :sushi:");
+					}
+				}
+			});
+		}
+		
+		//if the message isn't a pm and is in the correct channel, give them exp
+		if (message.channel.type === "dm") {
+			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. You ain't gon get no exp unless you talk in the main chat. :^)");
+			
+		//if not a PM, then add it towards the user's word count.
+		} else if (message.channel.id.localeCompare(channel) === 0){
+			message.channel.startTyping();
+				
+				
+				let params = {
+					TableName: "discordBot",
+					Key:{
+						"userID": message.author.id
+					}
+				}
+			//	console.log("before docClient");
+				
+				var exp = 0;
+				docClient.get(params, function(err, data){
+					if (err){
+						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
 						
 					}else{
 						
-						let curUser = data.Item;
-					//	exp = data.exp;
-						let exp = message.content.length + curUser.exp;
-						let lvl = curUser.lvl;
-					//	console.log(exp + " " + lvl + " " + levelUpReq[lvl]);
-						if (exp >= levelUpReq[lvl]){
-							console.log("Level up!");
-							lvl++;
+						//if this is the user's first time talking, create new entry
+						if (data.Item == undefined){
 							
-							let random = Math.floor(Math.random()*5);
-							
-							if (message.author.username.localeCompare("230871119320711168") === 0){
-								message.channel.sendMessage("Congratulations master Zeb, you just leveled up!");
-							}else{
-								message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
+							let newID = {
+								TableName:"discordBot",
+								Item:{
+									"userID": message.author.id,
+									"lvl": 0,
+									"exp": 0
+								}
 							}
+							
+							docClient.put(newID, function(err, data){
+								  if (err) {
+									console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+								} else {
+									console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
+								}
+							});
+							
+						}else{
+							
+							let curUser = data.Item;
+							let exp = message.content.length + curUser.exp;
+							let lvl = curUser.lvl;
+							
+							if (exp >= levelUpReq[lvl]){
+								console.log("Level up!");
+								lvl++;
+								
+								let random = Math.floor(Math.random()*5);
+								
+								if (message.author.username.localeCompare("230871119320711168") === 0){
+									message.channel.sendMessage("Congratulations master Zeb, you just leveled up!");
+								}else{
+									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
+								}
+							}
+								
+							
+							
+							let updatedUser = {
+								TableName:"discordBot",
+								Key:{
+									"userID": message.author.id
+								},
+								UpdateExpression: "set lvl = :l, exp = :e",
+								ExpressionAttributeValues:{
+									":l":lvl,
+									":e":exp
+								},
+								ReturnValues:"UPDATED_NEW"
+							};
+							
+							
+							docClient.update(updatedUser, function(err, data) {
+								if (err) {
+									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+								} else {
+									console.log("Successfully updated", JSON.stringify(data, null, 2));
+								}
+							});
+							
 						}
-							
-						
-						
-						let updatedUser = {
-							TableName:"discordBot",
-							Key:{
-								"userID": message.author.id
-							},
-							UpdateExpression: "set lvl = :l, exp = :e",
-							ExpressionAttributeValues:{
-								":l":lvl,
-								":e":exp
-							},
-							ReturnValues:"UPDATED_NEW"
-						};
-						
-						
-						docClient.update(updatedUser, function(err, data) {
-							if (err) {
-								console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
-							} else {
-								console.log("Successfully updated", JSON.stringify(data, null, 2));
-							}
-						});
-					
-						//update entry here
-						
 					}
-					//console.log(data);
-				}
-			});
-			
-		
-			
-			/*
-			docClient.query(params, function(err, data){
-				if (err){
-					console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
-				}else{
-					console.log("Successful query");
-					
-				}
+				});
 				
-			});
-			*/
-			
-			//console.log("userid: " + id);
-		
-			//if id is not already in table, create new id
-			
-			
-			
-              //  console.log(`(${message.server.name} / ${message.channel.name}) ${message.author.name}: ${message.content}`);
-			  /*
-			  console.log(`(${message.channel.name}) ${message.author.username}: ${message.content}`);
-			  console.log(typeof(message.content));
-			  console.log(message.content.length);
-			  */
-        }
+			message.channel.stopTyping();
+		}
 		
 	}
 });
