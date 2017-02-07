@@ -56,7 +56,6 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		channel = obj.chatChannel;
 		newsAndEvents = obj.news;
 		applications = obj.applications;
-		console.log(levelUpReq);
 		botToken = obj.token;
 		client.login(obj.token);
 		
@@ -88,12 +87,22 @@ client.on('message', function(message) {
 		
 		
 		if (message.content.toLowerCase() === 'give me sushi' || message.content.toLowerCase() === 'sushi please') {
+			message.channel.startTyping();
 			message.reply(sushi[Math.floor(Math.random()*8)]);
-
+			
+			message.channel.stopTyping(true);
+			
 		}else if (message.content.toLowerCase() === "what is hangout utopia?"){
+			
+			message.channel.startTyping();
+			
 			message.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\n\n If you'd like to learn more, then check out " + `${client.channels.get(newsAndEvents)}` + " for all the fun activities! If you want to get involved then check out " + `${client.channels.get(applications)}` + ". We have a lot of a roles that you def would be able to apply for!");
 			
+			message.channel.stopTyping(true);
 		}else if (message.content.toLowerCase() === "!level"){
+			
+			message.channel.startTyping();
+			
 			let params = {
 				TableName: "discordBot",
 				Key:{
@@ -134,6 +143,8 @@ client.on('message', function(message) {
 					}
 				}
 			});
+			
+			message.channel.stopTyping(true);
 		}
 		
 		//if the message isn't a pm and is in the correct channel, give them exp
@@ -142,7 +153,7 @@ client.on('message', function(message) {
 			
 		//if not a PM, then add it towards the user's word count.
 		} else if (message.channel.id.localeCompare(channel) === 0){
-			message.channel.startTyping();
+			
 				
 				
 				let params = {
@@ -187,6 +198,7 @@ client.on('message', function(message) {
 							let lvl = curUser.lvl;
 							
 							if (exp >= levelUpReq[lvl]){
+								message.channel.startTyping();
 								console.log("Level up!");
 								lvl++;
 								
@@ -197,6 +209,8 @@ client.on('message', function(message) {
 								}else{
 									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
 								}
+								
+								message.channel.stopTyping(true);
 							}
 								
 							
@@ -227,7 +241,6 @@ client.on('message', function(message) {
 					}
 				});
 				
-			message.channel.stopTyping(true);
 		}
 		
 	}
