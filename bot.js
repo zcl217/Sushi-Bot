@@ -40,12 +40,12 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.username}!`);
-  
+  console.log(client.users);
 });
 
 client.on('message', msg => {
-  if (msg.content === 'ping') {
-    msg.reply('Pong!');
+  if (msg.content === 'Give Me Sushi') {
+    msg.reply('President Sushi at your service.');
 	
   }
 });
@@ -120,7 +120,7 @@ client.on('message', function(message) {
 							console.log("Level up!");
 							lvl++;
 							
-							let random = Math.floor(1+Math.random()*5);
+							let random = Math.floor(Math.random()*5);
 							
 							message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
 						}
