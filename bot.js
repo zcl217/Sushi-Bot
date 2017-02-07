@@ -17,6 +17,16 @@ const docClient = new AWS.DynamoDB.DocumentClient()
 
 const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"]
 
+const sushi = [
+	"Here is a delicious California Sushi roll at your service!",
+	":sushi::sushi::sushi:",
+	"I got you the flaming hot spicy Volcano Sushi Roll be careful it packs a bunch!",
+	"Dynamite Sushi Roll on the dial! It has an explosion of flavors!",
+	"Dragon Sushi Roll will def exceed your expectations, try it now!",
+	"Looking for a crunch?! Well here's a Sushi Crunchy Roll!",
+	"You want a party in your mouth!? Rainbow Sushi Roll will blast you with flavor!"
+]
+
 var levelUpReq = [];
 var channel;
 
@@ -40,14 +50,15 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.username}!`);
-  console.log(client.users);
 });
 
 client.on('message', msg => {
-  if (msg.content === 'Give Me Sushi') {
-    msg.reply('President Sushi at your service.');
-	
-  }
+	  if (msg.content === 'Give Me Sushi' || msg.content === 'Sushi Please') {
+		  
+		
+		msg.reply(sushi[Math.floor(Math.random()*7)]);
+		
+	  }
 });
 
 //char limit is 2k
@@ -57,8 +68,7 @@ client.on('message', msg => {
 //user id is a string not int
 
 client.on('message', function(message) {
-	//console.log(message.channel);
-	console.log(levelUpReq);
+	//console.log(message.channel);	
 	//bind it to certain channels?
 	
 	console.log(message.author);
