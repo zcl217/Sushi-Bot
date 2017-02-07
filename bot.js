@@ -39,6 +39,7 @@ const sushi = [
 
 var levelUpReq = [];
 var channel;
+var owner;
 var newsAndEvents;
 var applications;
 
@@ -51,6 +52,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		for (let a = 0; a < 10; a++){
 			levelUpReq[a] = obj[a];
 		}
+		owner = obj.owner;
 		channel = obj.chatChannel;
 		newsAndEvents = obj.news;
 		applications = obj.applications;
@@ -59,7 +61,8 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		client.login(obj.token);
 		
 		
-		mBot.run(serverName, textChannelName, voiceChannelName, aliasesFile, botToken);
+		
+		//mBot.run(serverName, textChannelName, voiceChannelName, aliasesFile, botToken);
 		
 		
 	}
@@ -189,8 +192,8 @@ client.on('message', function(message) {
 								
 								let random = Math.floor(Math.random()*5);
 								
-								if (message.author.username.localeCompare("230871119320711168") === 0){
-									message.channel.sendMessage("Congratulations master Zeb, you just leveled up!");
+								if (message.author.id.localeCompare(owner) === 0){
+									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up!");
 								}else{
 									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
 								}
@@ -224,7 +227,7 @@ client.on('message', function(message) {
 					}
 				});
 				
-			message.channel.stopTyping();
+			message.channel.stopTyping(true);
 		}
 		
 	}
