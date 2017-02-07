@@ -40,7 +40,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		for (let a = 0; a < 10; a++){
 			levelUpReq[a] = obj[a];
 		}
-		channel = obj.temp;
+		channel = obj.chatChannel;
 		console.log(levelUpReq);
 		client.login(obj.token);
 		
@@ -56,11 +56,11 @@ client.on('ready', () => {
 client.on('message', msg => {
 	  if (msg.content.toLowerCase() === 'give me sushi' || msg.content.toLowerCase() === 'sushi please') {
 		
-		msg.reply(sushi[Math.floor(Math.random()*7)]);
+		msg.reply(sushi[Math.floor(Math.random()*8)]);
 		
 	  }
 	  
-	  if (msg.content.toLowerCase() === "what's hangout utopia?"){
+	  if (msg.content.toLowerCase() === "what is hangout utopia?"){
 		msg.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\nIf you'd like to learn more, then check out #news-and-events  for all the fun activities! If you want to get involved then check out #applications  We have a lot of a roles that you def would be able to apply for!");
 	  }
 });
@@ -136,7 +136,11 @@ client.on('message', function(message) {
 							
 							let random = Math.floor(Math.random()*5);
 							
-							message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
+							if (message.author.username.localeCompare("230871119320711168") === 0){
+								message.channel.sendMessage("Congratulations master Zeb, you just leveled up!");
+							}else{
+								message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + face[random]);
+							}
 						}
 							
 						
@@ -198,9 +202,6 @@ client.on('message', function(message) {
 			  */
         }
 		
-		//delete the else below >>>>
-	}else{
-		console.log("it was the bot that posted");
 	}
 });
 
