@@ -24,7 +24,7 @@ AWS.config.update({
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 
-const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"]
+const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"];
 
 const sushi = [
 	"Here is a delicious California Sushi roll at your service!",
@@ -35,7 +35,14 @@ const sushi = [
 	"Looking for a crunch?! Well here's a Sushi Crunchy Roll!",
 	"You want a party in your mouth!? Rainbow Sushi Roll will blast you with flavor!",
 	"Oh noo! Bad luck for you! >:D You will now eat a POISON SUSHI Roll! MWAHahaha.... I'm just kidding c:"
-]
+];
+
+const funFacts = [
+	"Did you know that in Korea, live Octopus is considered a delicious treat! They believe eating live Octopus, is a sheer way to build strength and stamina.",
+	"The most dangerous sushi, is the pufferfish sushi. Sushi Chef requires a license to even prepare or make them.",
+	"In order for Octopus to have a nice texture and a higher refined taste, Chefs would massage the Octopus for about 20 mins before preparing them."
+
+];
 
 var levelUpReq = [];
 var channel;
@@ -74,6 +81,10 @@ client.on('ready', () => {
  
 });
 
+client.on('guildMemberAdd', () =>{
+	client.channels.get(channel).sendMessage("");
+});
+
 //char limit is 2k
 //set lvl 1 to like 100, level 2 to 2300 total or something
 
@@ -92,6 +103,30 @@ client.on('message', function(message) {
 			
 			message.channel.stopTyping(true);
 			
+		}else if (message.content.toLowerCase() === '!commands'){
+			
+			//message.author.sendMessage("test");
+			//PM the user the commands
+			message.author.sendMessage("You requested the commands? Here is a list of all the functions / commands you can do (none of them are case sensitive).\n\n" +
+			
+			" 1) **Sushi please** : Gives you a random sushi\n\n"+
+			" 2) **What is Hangout Utopia?** : Gives you information about the server\n\n" +
+			" 3) **!fun fact** : Gives you a random fact\n\n" + 
+			" 4) **!level** : Displays your current level (exp gained through typing in chat-topia)\n\n" +
+			" 5) **!commands** :^)");
+		
+		
+		}else if (message.content.toLowerCase() === '!fun fact'){
+			
+			message.channel.startTyping();
+			
+			//try client.sendmessage into the chat channel
+			message.reply(funFacts[Math.floor(Math.random()*3)]);
+		
+			message.channel.stopTyping(true);
+		
+		
+		
 		}else if (message.content.toLowerCase() === "what is hangout utopia?"){
 			
 			message.channel.startTyping();
@@ -149,7 +184,7 @@ client.on('message', function(message) {
 		
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
-			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. You ain't gon get no exp unless you talk in the main chat. :^)");
+			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 			
 		//if not a PM, then add it towards the user's word count.
 		} else if (message.channel.id.localeCompare(channel) === 0){
