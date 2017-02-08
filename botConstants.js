@@ -1,0 +1,59 @@
+//list of constants used in bot messages
+const Discord = require("discord.js");
+const client = new Discord.Client();
+
+const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"];
+
+const sushi = [
+	"Here is a delicious California Sushi roll at your service!",
+	":sushi::sushi::sushi:",
+	"I got you the flaming hot spicy Volcano Sushi Roll be careful it packs a bunch!",
+	"Dynamite Sushi Roll on the dial! It has an explosion of flavors!",
+	"Dragon Sushi Roll will def exceed your expectations, try it now!",
+	"Looking for a crunch?! Well here's a Sushi Crunchy Roll!",
+	"You want a party in your mouth!? Rainbow Sushi Roll will blast you with flavor!",
+	"Oh noo! Bad luck for you! >:D You will now eat a POISON SUSHI Roll! MWAHahaha.... I'm just kidding c:"
+];
+
+const funFacts = [
+	"Did you know that in Korea, live Octopus is considered a delicious treat! They believe eating live Octopus, is a sheer way to build strength and stamina.",
+	"The most dangerous sushi, is the pufferfish sushi. Sushi Chef requires a license to even prepare or make them.",
+	"In order for Octopus to have a nice texture and a higher refined taste, Chefs would massage the Octopus for about 20 mins before preparing them."
+
+];
+
+const trophyList = [
+
+];
+
+const commands = "You requested the commands? Here is a list of all the functions / commands you can do (none of them are case sensitive).\n\n" +
+			
+			" 1) **Sushi please** : Gives you a random sushi\n\n"+
+			" 2) **What is Hangout Utopia?** : Gives you information about the server\n\n" +
+			" 3) **!fun fact** : Gives you a random fact\n\n" + 
+			" 4) **!level** : Displays your current level (exp gained through typing in chat-topia)\n\n" +
+			" 5) **!commands** :^)\n\n" +
+			" 6) **!trophies** : Displays all the trophies you possess";
+			
+			
+const trophies = "You desire to see the list of wonderful trophies in store? Seek no further:\n\n" +
+			
+			" 1) " + client.emojis.find('name', 'bronze') + " The bronze trophy is granted upon reaching level 10.\n\n" +
+			" 2) " + client.emojis.find('name', 'silver') + " The silver trophy is  granted upon reaching level 20.\n\n" +
+			" 3) " + client.emojis.find('name', 'gold') + "The gold trophy is granted upon reaching level 30.\n\n" + 
+			// waiting for the 4th trophy
+			" 4) " + "" + "\n\n" +
+			" 5) " + client.emojis.find('name', 'dot') + "The Dot Master trophy is granted upon reaching level 50.\n\n" +
+			" 6) " + client.emojis.find('name', 'od') + "Overwhelming Dedication - Only those whose contributed to the community with flying colors, will be able to receive this trophy. Taking part in the community activities and events boost up your goal a lot. Taking part in voice calls and community discussions is an excellent way relieve Overwhelming Dedication.\n\n" +
+			" 7) " + "" + "Hand Triumph - This is earned by creating your own unique art style that is perfectly refined and interesting. Only those who are skilled in multiple fields can obtain this trophy. This is analyzed from shading through anatomy and more.\n\n" +
+			" 8) " + "" + "Brush Utopia - This trophy is individually selected by KnockoutSushi for creating an amazing digital painting that meets his 10/10 standards.\n\n";
+			
+			
+module.exports = {
+	commands: commands,
+    trophies: trophies,
+	face: face,
+	sushi: sushi,
+	funFacts: funFacts,
+    // ...
+}
