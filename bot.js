@@ -33,6 +33,7 @@ var owner;
 var newsAndEvents;
 var applications;
 var userSushi;
+var userYang
 var test;
 
 fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
@@ -50,6 +51,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		applications = obj.applications;
 		botToken = obj.token;
 		userSushi = obj.sushi;
+		userYang = obj.yang;
 		test = obj.test;
 		client.login(obj.token);
 		
@@ -79,7 +81,7 @@ client.on('message', function(message) {
 	if (message.author.id.localeCompare("276207143961755648") !== 0){
 		
 		
-		if (message.content.toLowerCase() === 'give me sushi' || message.content.toLowerCase() === 'sushi please') {
+		if (message.content.toLowerCase() === '!give me sushi' || message.content.toLowerCase() === '!sushi please') {
 			message.channel.startTyping();
 			message.reply(botConstants.sushi[Math.floor(Math.random()*8)]);
 			
@@ -91,11 +93,29 @@ client.on('message', function(message) {
 			message.author.sendMessage(botConstants.commands);
 			//" 7) **!trophyList** : Displays all available trophies");
 		
-		}else if (message.content.toLowerCase() === '!trophyList GGGGGG'){
+		}else if (message.content.toLowerCase() === '!trophylist'){
 		
 			//PM the user the list of trophies
-			message.author.sendMessage(botConstants.trophies);
-		
+			//message.author.sendMessage(botConstants.trophies);
+			//message.channel.sendMessage(botConstants.trophies))
+			
+			message.channel.sendMessage("You desire to see the list of wonderful trophies in store? Seek no further:\n\n" +
+			
+			" 1) " + client.emojis.find('name', 'bronze') + " The bronze trophy is granted upon reaching level 10.\n\n" +
+			" 2) " + client.emojis.find('name', 'silver') + " The silver trophy is  granted upon reaching level 20.\n\n" +
+			" 3) " + client.emojis.find('name', 'gold') + " The gold trophy is granted upon reaching level 30.\n\n" + 
+			// waiting for the 4th trophy
+			" 4) " + "" + "The ? trophy is granted upon reaching level 40.\n\n" +
+			" 5) " + client.emojis.find('name', 'master') + " The master trophy is granted upon reaching level 50.\n\n" +
+			" 6) " + client.emojis.find('name', 'od') + " Overwhelming Dedication - Only those whose contributed to the community with flying colors, will be able to receive this trophy. Taking part in the community activities and events boost up your goal a lot. Taking part in voice calls and community discussions is an excellent way to achieve Overwhelming Dedication.\n\n" +
+			" 7) " + client.emojis.find('name', 'ht') + " Hand Triumph - This is earned by creating your own unique art style that is perfectly refined and interesting. Only those who are skilled in multiple fields can obtain this trophy. This is analyzed from shading through anatomy and more.\n\n" +
+			" 8) " + client.emojis.find('name', 'brush') + " Brush Utopia - This trophy is individually selected by KnockoutSushi for creating an amazing digital painting that meets his 10/10 standards.\n\n" +
+			" 9) " + client.emojis.find('name', 'dc') + ` Division Conqueror - For those who have contributed to a division within ${client.channels.get("267682600192180224")} and stays consistent with the designated task for that particular role.\n\n` +
+			" 10) " + client.emojis.find('name', 'fa') + " Flashy Assault - Those who participated and won in a Fighting Game Tournament will earn this Trophy!\n\n" +
+			" 11) " + client.emojis.find('name', 'wi') + " Warm Introduction - This achievement is gained from always staying on top of welcoming members to make them feel more comfortable and apart of Hangout Utopia.\n\n" +
+			" 12) " + client.emojis.find('name', 'crest') + " Dueler's Crest - This achievement is given to the dedicated pro gamers of Hangout Utopia who has won 3 or more Game Tournaments hosted by our community.\n\n"); 
+
+			
 		}else if (message.content.toLowerCase() === '!fun fact'){
 			
 			message.channel.startTyping();
@@ -104,7 +124,7 @@ client.on('message', function(message) {
 		
 			message.channel.stopTyping(true);	
 		
-		}else if (message.content.toLowerCase() === "what is hangout utopia?"){
+		}else if (message.content.toLowerCase() === "!what is hangout utopia?"){
 			
 			message.channel.startTyping();
 			
@@ -181,7 +201,7 @@ client.on('message', function(message) {
 					message.reply("Error :/ Please contact Zeb about this");
 				} else {
 					console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
-					console.log(data);
+					console.log(data.Item);
 					
 					if (data.Item == undefined){
 								//create new table entry
@@ -228,15 +248,100 @@ client.on('message', function(message) {
 			
 			message.channel.stopTyping(true);
 			
-			//grant user of choice a trophy
+		//grant user of choice a trophy
 		}else if (message.author.id === userSushi || message.author.id === owner){
 			
-			if (message.content.toLowerCase().substring(0, 5) === "!give"){
+			let values = message.content.split(" ");
+			
+			if (message.content.toLowerCase().substring(0, 5) === "!give" && values.length === 3){
+						
+				console.log(values);
+				//check if trophy is valid, otherwise just restart
+				if (botConstants.trophyList.indexOf(values[2].toLowerCase()) > -1){
+					console.log("valid trophy");
+					let params = {
+						TableName: "discordBot",
+						Key:{
+							"userID": values[1]
+						}
+					};
+
+					//look up a user's trophy list. if the user never talked before, create new entry
+					docClient.get(params, function(err, data) {
+						if (err) {
+							console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+							message.reply("Error :/ Please contact Zeb about this");
+						} else {
+							
+							console.log(data.Item);
+							
+							if (data.Item == undefined){
+										
+								message.reply(" The ID you included either isn't valid, or the person has never talked in all chat before (he/she needs to type something in chat-topia to have a profile created).");
+								
+							}else{
+								
+								let userTrophies = data.Item.trophies;
+								console.log(userTrophies);
+								//check whether or not the user already has the trophy
+								if (userTrophies.indexOf(values[2].toLowerCase()) > -1){
+									
+									message.reply("This user already has the " + values[2] + " trophy.");
+									
+								}else{
+									
+									
+									userTrophies.push(values[2].toLowerCase());
+									let updatedUser = {
+										TableName:"discordBot",
+										Key:{
+											"userID": values[1]
+										},
+										UpdateExpression: "set lvl = :l, exp = :e, trophies = :t",
+										ExpressionAttributeValues:{
+											":l":data.Item.lvl,
+											":e":data.Item.exp,
+											":t":userTrophies
+										},
+										ReturnValues:"UPDATED_NEW"
+									};
+									
+									
+									docClient.update(updatedUser, function(err, data) {
+										if (err) {
+											console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+											message.reply("Error :/ Please contact Zeb about this");
+										} else {
+											
+											
+											console.log("Successfully updated", JSON.stringify(data, null, 2));
+											message.reply("Trophy successfully granted! :smiley:");
+											console.log(client.users.get(values[1]));
+											console.log(data);
+											//broadcast the good news
+											//client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2].toLowerCase() + " trophy!");
+										}
+									});
+										
+								}
+										
+									
+							}
+						}
+					});
 				
+			
+				}else{
+					message.reply("No such trophy exists. Did you make a typo?");
+				}
+				
+				
+			//remove a user's trophy	
+			}else if(message.content.toLowerCase().substring(0, 7) === '!remove' && values.length === 3){
 				let values = message.content.split(" ");
 				console.log(values);
 				//check if trophy is valid, otherwise just restart
-				//if (values[2]){
+				if (botConstants.trophyList.indexOf(values[2].toLowerCase()) > -1){
 				
 					let params = {
 						TableName: "discordBot",
@@ -261,10 +366,14 @@ client.on('message', function(message) {
 							}else{
 								
 								let userTrophies = data.Item.trophies;
+								console.log(userTrophies);
+								
+								let index = userTrophies.indexOf(values[2].toLowerCase());
 								
 								//check whether or not the user already has the trophy
-								if (trophyList.indexOf(values[2]) > -1){
-								
+								if (index > -1){
+									
+									userTrophies.splice(index, 1);
 									let updatedUser = {
 											TableName:"discordBot",
 											Key:{
@@ -288,15 +397,16 @@ client.on('message', function(message) {
 												
 												
 												console.log("Successfully updated", JSON.stringify(data, null, 2));
-												message.reply("Trophy successfully granted! :smiley:");
+												message.reply("Trophy successfully removed.");
 												
-												//broadcast the good news
-												client.channels.get(newsAndEvents).sendMessage("")
 											}
 										});
-								}else{
 									
-									message.reply("This user already has the " + values[2] + " trophy.");
+								}else{
+									message.reply("This user does not have the " + values[2] + " trophy.");
+									
+									
+										
 								}
 									
 									
@@ -304,16 +414,18 @@ client.on('message', function(message) {
 						}
 					});
 				}
-				
+			}else if (message.content.toLowerCase() === '!trophyshortcuts'){
+				message.author.sendMessage(botConstants.shortcuts);
 			}
+				
+		}
 		
 		
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
 			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 			
-		//if not a PM, then add it towards the user's word count.
-		} else if (message.channel.id.localeCompare(test) === 0){
+		} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0){
 		//}else if (message.content === 'ultra secret command'){	
 				
 				
@@ -369,10 +481,13 @@ client.on('message', function(message) {
 								
 								
 								if (message.author.id.localeCompare(owner) === 0){
-									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ") :^)");
+									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
 									
 								}else if (message.author.id.localeCompare(userSushi) === 0){
-									message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level (level " + lvl + ").");
+									message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
+									
+								}else if (message.author.id.localeCompare(userYang) === 0){
+									message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
 								
 								}else{
 									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
