@@ -51,7 +51,7 @@ const trophyList = [
 	"inkmaster",
 	"ht",
 	"brush",
-	"overwhelming"
+	"od"
 	
 ];
 

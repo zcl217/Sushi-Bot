@@ -197,15 +197,15 @@ client.on('message', function(message) {
 			};
 
 			//look up a user's trophy list. if the user never talked before, create new entry
-			docClient.get(params, function(err, data) {
+			docClient.get(params, function(err, dataTrophy) {
 				if (err) {
 					console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
 					message.reply("Error :/ Please contact Zeb about this");
 				} else {
-					console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
-					console.log(data.Item);
+					console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
+					console.log(dataTrophy.Item);
 					
-					if (data.Item == undefined){
+					if (dataTrophy.Item == undefined){
 								//create new table entry
 								
 								let newID = {
@@ -234,7 +234,7 @@ client.on('message', function(message) {
 						//message.reply(client.emojis.find('name', 'bronze'));
 						let trophies = "";
 						
-						data.Item.trophies.forEach(trophy =>{
+						dataTrophy.Item.trophies.forEach(trophy =>{
 							trophies += client.emojis.find('name', trophy);
 						});
 						
@@ -308,11 +308,12 @@ client.on('message', function(message) {
 			
 			message.channel.stopTyping(true);
 			
-		//grant user of choice a trophy
-		}else if (message.author.id === userSushi || message.author.id === owner){
+		//only admins can give/remove stuff	
+		}else if (message.content.substring(0, 1) === "!" && (message.author.id === userSushi || message.author.id === owner)){
 			
 			let values = message.content.split(" ");
 			
+			//grant user of choice a trophy
 			if (message.content.toLowerCase().substring(0, 11) === "!givetrophy"){
 						
 				console.log(values);
@@ -332,16 +333,16 @@ client.on('message', function(message) {
 					};
 
 					//look up a user's trophy list. if the user never talked before, create new entry
-					docClient.get(params, function(err, data) {
+					docClient.get(params, function(err, dataTrophy) {
 						if (err) {
 							console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
 							message.reply("Error :/ Please contact Zeb about this");
 						} else {
 							
-							console.log(data.Item);
+							console.log(dataTrophy.Item);
 							
 							
-							if (data.Item == undefined){
+							if (dataTrophy.Item == undefined){
 										
 								message.reply(" The ID you included either isn't valid, or the person has never talked in all chat before (he/she needs to type something in chat-topia to have a profile created).");
 								
@@ -361,7 +362,7 @@ client.on('message', function(message) {
 								}
 							
 								
-								let userTrophies = data.Item.trophies;
+								let userTrophies = dataTrophy.Item.trophies;
 								console.log(userTrophies);
 								//check whether or not the user already has the trophy
 								if (userTrophies.indexOf(trophy.toLowerCase()) > -1){
@@ -379,8 +380,8 @@ client.on('message', function(message) {
 										},
 										UpdateExpression: "set lvl = :l, exp = :e, trophies = :t",
 										ExpressionAttributeValues:{
-											":l":data.Item.lvl,
-											":e":data.Item.exp,
+											":l":dataTrophy.Item.lvl,
+											":e":dataTrophy.Item.exp,
 											":t":userTrophies
 										},
 										ReturnValues:"UPDATED_NEW"
@@ -394,7 +395,7 @@ client.on('message', function(message) {
 										} else {
 											
 											
-											console.log("Successfully updated", JSON.stringify(data, null, 2));
+											console.log("Successfully updated (trophy granted)", JSON.stringify(data, null, 2));
 											message.reply("Trophy successfully granted! :smiley:");
 											console.log(client.users.get(values[1]));
 											console.log(data);
@@ -403,7 +404,8 @@ client.on('message', function(message) {
 											
 											
 											//broadcast the good news
-											client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2] + " trophy!");
+											message.reply("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2] + " trophy!");
+											//client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2] + " trophy!");
 										}
 									});
 										
@@ -476,7 +478,8 @@ client.on('message', function(message) {
 								//check whether or not the user already has the trophy
 								if (index > -1){
 									
-									userTrophies.splice(index, 1);
+									console.log(userTrophies.splice(index, 1));
+									console.log("after splice : " + userTrophies);
 									let updatedUser = {
 											TableName:"discordBot",
 											Key:{
@@ -490,7 +493,7 @@ client.on('message', function(message) {
 											},
 											ReturnValues:"UPDATED_NEW"
 										};
-										
+										console.log(updatedUser + " line 496");
 										
 										docClient.update(updatedUser, function(err, data) {
 											if (err) {
@@ -499,7 +502,7 @@ client.on('message', function(message) {
 											} else {
 												
 												
-												console.log("Successfully updated", JSON.stringify(data, null, 2));
+												console.log("Successfully updated (trophy removed)", JSON.stringify(data, null, 2));
 												message.reply("The " + trophyPrint + " trophy has been successfully removed.");
 												
 											}
@@ -518,9 +521,7 @@ client.on('message', function(message) {
 						}
 					});
 				}
-			}else if (message.content.toLowerCase() === '!trophyshortcuts'){
-				message.author.sendMessage(botConstants.shortcuts);
-			
+				
 			}else if (message.content.toLowerCase().substring(0, 10) === "!givecoins" && values.length === 3){
 						
 				console.log(values);
@@ -553,40 +554,40 @@ client.on('message', function(message) {
 								
 							}else{
 							
-							let userCoins = 0;
+								let userCoins = 0;
+								
+								if (data.Item.coins == undefined){
+									userCoins = coinValue;
+								}else{
+									userCoins = data.Item.coins + coinValue;
+								}
 							
-							if (data.Item.coins == undefined){
-								userCoins = coinValue;
-							}else{
-								userCoins = data.Item.coins + coinValue;
-							}
-						
-								let updatedUser = {
-									TableName:"discordBot",
-									Key:{
-										"userID": values[1]
-									},
-									UpdateExpression: "set coins = :c",
-									ExpressionAttributeValues:{
-										":c":userCoins
-									},
-									ReturnValues:"UPDATED_NEW"
-								};
-								
-								
-								docClient.update(updatedUser, function(err, data) {
-									if (err) {
-										console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
-									//	message.reply("Error :/ Please contact Zeb about this");
-									} else {
-										
-										
-										console.log("Successfully updated", JSON.stringify(data, null, 2));
-										message.reply("Coins successfully granted! :smiley:");
-										console.log(client.users.get(values[1]));
-										console.log(data);
-									}
-								});
+									let updatedUser = {
+										TableName:"discordBot",
+										Key:{
+											"userID": values[1]
+										},
+										UpdateExpression: "set coins = :c",
+										ExpressionAttributeValues:{
+											":c":userCoins
+										},
+										ReturnValues:"UPDATED_NEW"
+									};
+									
+									
+									docClient.update(updatedUser, function(err, data) {
+										if (err) {
+											console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+										//	message.reply("Error :/ Please contact Zeb about this");
+										} else {
+											
+											
+											console.log("Successfully updated", JSON.stringify(data, null, 2));
+											message.reply("Coins successfully granted! :smiley:");
+											console.log(client.users.get(values[1]));
+											console.log(data);
+										}
+									});
 									
 							}
 							
@@ -673,156 +674,144 @@ client.on('message', function(message) {
 				});
 			}
 				
-		}
+		}else{
 		
 		
-		//if the message isn't a pm and is in the correct channel, give them exp
-		if (message.channel.type === "dm") {
-			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
-			
-		} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0 || message.channel.id.localeCompare(gameChannel) === 0){
-		//}else if (message.content === 'ultra secret command'){	
+			//if the message isn't a pm and is in the correct channel, give them exp
+			if (message.channel.type === "dm") {
+				message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 				
-				
-				let params = {
-					TableName: "discordBot",
-					Key:{
-						"userID": message.author.id
+			} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0 || message.channel.id.localeCompare(gameChannel) === 0){
+			//}else if (message.content === 'ultra secret command'){	
+					
+					console.log(message.author.id + " author id");
+					
+					let params = {
+						TableName: "discordBot",
+						Key:{
+							"userID": message.author.id
+						}
 					}
-				}
-			//	console.log("before docClient");
-				
-				var exp = 0;
-				docClient.get(params, function(err, data){
-					if (err){
-						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-						message.reply("Error :/ Please contact Zeb about this");
-						
-					}else{
-						
-						//if this is the user's first time talking, create new entry
-						if (data.Item == undefined){
-							
-							let newID = {
-								TableName:"discordBot",
-								Item:{
-									"userID": message.author.id,
-									"lvl": 0,
-									"exp": 0,
-									"trophies": [],
-									"coins": 0
-								}
-							}
-							
-							docClient.put(newID, function(err, data){
-								  if (err) {
-									console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-								} else {
-									console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
-								}
-							});
+				//	console.log("before docClient");
+					
+					var exp = 0;
+					docClient.get(params, function(err, dataEXP){
+						if (err){
+							console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+							message.reply("Error :/ Please contact Zeb about this");
 							
 						}else{
 							
-							let curUser = data.Item;
-							let exp = message.content.length + curUser.exp;
-							let lvl = curUser.lvl;
-							let userTrophies = curUser.trophies;
-							let temp = 0;
-							while (exp >= levelUpReq[lvl]){
-								temp = 1;
-								//message.channel.startTyping();
-								console.log("Level up!");
-								lvl++;
+							//if this is the user's first time talking, create new entry
+							if (dataEXP.Item == undefined){
 								
-								let random = Math.floor(Math.random()*5);
-								
-								/*
-								if (message.author.id.localeCompare(owner) === 0){
-									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
-									
-								}else if (message.author.id.localeCompare(userSushi) === 0){
-									message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
-									
-								}else if (message.author.id.localeCompare(userYang) === 0){
-									message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
-								
-								}else{
-									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
+								let newID = {
+									TableName:"discordBot",
+									Item:{
+										"userID": message.author.id,
+										"lvl": 0,
+										"exp": 0,
+										"trophies": [],
+										"coins": 0
+									}
 								}
 								
-								*/
-								if (lvl == 10){
-									userTrophies.push("bronze");
-									message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
-									
-								}else if (lvl == 20){
-									userTrophies.push("silver");
-									message.channel.sendMessage(message.author.username + " also earned a silver trophy! Congratulations!");
-									
-								}else if (lvl == 30){
-									userTrophies.push("gold");
-									message.channel.sendMessage(message.author.username + " also earned a gold trophy! Congratulations!");
-									
-								}else if (lvl == 40){
-									
-									userTrophies.push("bronze");
-									message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
-									
-								}else if (lvl == 50){
-									userTrophies.push("bronze");
-									message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
-									
-								}
+								docClient.put(newID, function(err, data){
+									  if (err) {
+										console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+									} else {
+										console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
+									}
+								});
 								
-								//delete this after a few days or something
-							if (temp == 1){
-								if (message.author.id.localeCompare(owner) === 0){
-									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
-									
-								}else if (message.author.id.localeCompare(userSushi) === 0){
-									message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
-									
-								}else if (message.author.id.localeCompare(userYang) === 0){
-									message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
+							}else{
 								
-								}else{
-									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
+								let curUser = dataEXP.Item;
+								
+								console.log(curUser);
+								
+								let exp = message.content.length + curUser.exp;
+								let lvl = curUser.lvl;
+								let userTrophies = curUser.trophies;
+								let temp = 0;
+								while (exp >= levelUpReq[lvl]){
+									temp = 1;
+									message.channel.startTyping();
+									console.log("Level up!");
+									lvl++;
+									
+									let random = Math.floor(Math.random()*5);
+									
+									
+									if (message.author.id.localeCompare(owner) === 0){
+										message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
+										
+									}else if (message.author.id.localeCompare(userSushi) === 0){
+										message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
+										
+									}else if (message.author.id.localeCompare(userYang) === 0){
+										message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
+									
+									}else{
+										message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
+									}
+									
+									
+									if (lvl == 10){
+										userTrophies.push("bronze");
+										message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
+										
+									}else if (lvl == 20){
+										userTrophies.push("silver");
+										message.channel.sendMessage(message.author.username + " also earned a silver trophy! Congratulations!");
+										
+									}else if (lvl == 30){
+										userTrophies.push("gold");
+										message.channel.sendMessage(message.author.username + " also earned a gold trophy! Congratulations!");
+										
+									}else if (lvl == 40){
+										
+										
+									}else if (lvl == 50){
+										userTrophies.push("bronze");
+										message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
+										
+									}
+					
+									
+									message.channel.stopTyping(true);
 								}
+									
+								
+								
+								let updatedUserExp = {
+									TableName:"discordBot",
+									Key:{
+										"userID": message.author.id
+									},
+									UpdateExpression: "set lvl = :l, exp = :e, trophies = :t",
+									ExpressionAttributeValues:{
+										":l":lvl,
+										":e":exp,
+										":t":userTrophies
+									},
+									ReturnValues:"UPDATED_NEW"
+								};
+								
+								
+								docClient.update(updatedUserExp, function(err, data) {
+									if (err) {
+										console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+									} else {
+										console.log("Successfully updated (exp given)", JSON.stringify(data, null, 2));
+									}
+								});
+								
 							}
-								
-							//	message.channel.stopTyping(true);
-							}
-								
-							
-							
-							let updatedUser = {
-								TableName:"discordBot",
-								Key:{
-									"userID": message.author.id
-								},
-								UpdateExpression: "set lvl = :l, exp = :e, trophies = :t",
-								ExpressionAttributeValues:{
-									":l":lvl,
-									":e":exp,
-									":t":userTrophies
-								},
-								ReturnValues:"UPDATED_NEW"
-							};
-							
-							
-							docClient.update(updatedUser, function(err, data) {
-								if (err) {
-									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
-								} else {
-									console.log("Successfully updated", JSON.stringify(data, null, 2));
-								}
-							});
-							
 						}
-					}
-				});
-				
+					});
+					
+			}
 		}
 		
 	}
