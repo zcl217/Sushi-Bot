@@ -35,6 +35,7 @@ var applications;
 var userSushi;
 var userYang
 var test;
+var gameChannel;
 
 fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 	if (err){
@@ -53,6 +54,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		userSushi = obj.sushi;
 		userYang = obj.yang;
 		test = obj.test;
+		gameChannel = obj.game;
 		client.login(obj.token);
 		
 		//music bot currently uses up too many resources. disabling for now
@@ -425,7 +427,7 @@ client.on('message', function(message) {
 		if (message.channel.type === "dm") {
 			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 			
-		} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0){
+		} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0 || message.channel.id.localeCompare(gameChannel) === 0){
 		//}else if (message.content === 'ultra secret command'){	
 				
 				
