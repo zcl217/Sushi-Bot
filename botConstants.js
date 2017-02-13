@@ -27,12 +27,31 @@ const trophyList = [
 	"silver",
 	"gold",
 	"master",
-	"od",
+	"shiftknight",
+	"shiftbaron",
+	"shiftprince",
+	"shiftking",
+	"duelerscrest",
+	"flashyassault",
+	"heatedup",
+	"motionbeatdown",
+	"animationflames",
+	"brushutopia",
+	"duoace",
+	"handtriumph",
+	"warmintroduction",
+	"helpinghand",
+	"overwhelmingdedication",
+	"hourglassutopia",
+	"filmdasher",
+	"luxuryinvasion",
+	"thelottery",
+	"thefootdown",
+	"legendscraft",
+	"inkmaster",
 	"ht",
 	"brush",
-	"dc",
-	"fa",
-	"wi"
+	"overwhelming"
 	
 ];
 
@@ -43,12 +62,13 @@ const commands = "You requested the commands? Here is a list of all the function
 			" 3) **!fun fact** : Gives you a random fact\n\n" + 
 			" 4) **!level** : Displays your current level (exp gained through typing in chat-topia)\n\n" +
 			" 5) **!commands** :^)\n\n" +
-			" 6) **!trophies** : Displays all the trophies you currently possess\n\n"
+			" 6) **!trophies** : Displays all the trophies you currently possess\n\n" +
 			" 7) **!trophyList** : Displays a list of all available trophies and their respective description\n\n";
+			//" 8) **!coins** : Displays the current amount of coins you possess.\n\n";
 
-const shortcuts = "List of short names for the trophies:\n"+
+/* const shortcuts = "List of short names for the trophies:\n"+
 " Dot master = dot\n Overwhelming Dedication = od\n Hand Triumph = ht\n Brush Utopia = brush\n Division Conqueror = dc\n Flashy Assault = fa\n Warm Introduction = wi\n Dueler's Crest = crest\n";
-			
+			*/
 const trophies = "You desire to see the list of wonderful trophies in store? Seek no further:\n\n" +
 			
 			" 1) " + client.emojis.find('name', 'bronze') + " The bronze trophy is granted upon reaching level 10.\n\n" +
@@ -72,7 +92,6 @@ module.exports = {
 	sushi: sushi,
 	funFacts: funFacts,
 	trophyList: trophyList,
-	shortcuts: shortcuts,
 	
     // ...
 }

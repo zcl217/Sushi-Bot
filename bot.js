@@ -43,7 +43,7 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 	}else{
 		
 		let obj = JSON.parse(data);
-		for (let a = 0; a < 10; a++){
+		for (let a = 0; a < 50; a++){
 			levelUpReq[a] = obj[a];
 		}
 		owner = obj.owner;
@@ -214,7 +214,8 @@ client.on('message', function(message) {
 										"userID": message.author.id,
 										"lvl": 0,
 										"exp": 0,
-										"trophies": []
+										"trophies": [],
+										"coins": 0
 									}
 								}
 								
@@ -250,16 +251,78 @@ client.on('message', function(message) {
 			
 			message.channel.stopTyping(true);
 			
+		//tell the user how many coins they have
+		}else if (message.content.toLowerCase() === "!coinsA"){
+				
+			message.channel.startTyping();
+			
+			let params = {
+				TableName: "discordBot",
+				Key:{
+					"userID": message.author.id
+				}
+			};
+
+			//look up a user's level. if the user never talked before, create new entry
+			docClient.get(params, function(err, data) {
+				if (err) {
+					console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+					message.reply("Error :/ Please contact Zeb about this");
+				} else {
+					console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+					console.log(data);
+					
+					if (data.Item == undefined){
+								//create new table entry
+								
+								let newID = {
+									TableName:"discordBot",
+									Item:{
+										"userID": message.author.id,
+										"lvl": 0,
+										"exp": 0,
+										"trophies": [],
+										"coins": 0
+									}
+								}
+								
+								docClient.put(newID, function(err, data){
+									  if (err) {
+										console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+									} else {
+										console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
+									}
+								});
+								message.reply(" You currently have 0 coins. " + client.emojis.find('name', 'HUCoins'));
+					}else{
+						
+						if (data.Item.coins == undefined){
+							
+							message.reply(" You currently have 0 coins. " + client.emojis.find('name', 'HUCoins'))
+						}else{
+							message.reply(" You currently have " + data.Item.coins + " coins. " + client.emojis.find('name', 'HUCoins'));
+						}
+					}
+				}
+			});
+			
+			message.channel.stopTyping(true);
+			
 		//grant user of choice a trophy
 		}else if (message.author.id === userSushi || message.author.id === owner){
 			
 			let values = message.content.split(" ");
 			
-			if (message.content.toLowerCase().substring(0, 5) === "!give" && values.length === 3){
+			if (message.content.toLowerCase().substring(0, 11) === "!givetrophy"){
 						
 				console.log(values);
+				
+				let trophy = "";
+				for (let a = 0; a < values.length-2; a++){
+					trophy += values[a+2];
+				}
 				//check if trophy is valid, otherwise just restart
-				if (botConstants.trophyList.indexOf(values[2].toLowerCase()) > -1){
+				if (botConstants.trophyList.indexOf(trophy.toLowerCase()) > -1){
 					console.log("valid trophy");
 					let params = {
 						TableName: "discordBot",
@@ -277,23 +340,38 @@ client.on('message', function(message) {
 							
 							console.log(data.Item);
 							
+							
 							if (data.Item == undefined){
 										
 								message.reply(" The ID you included either isn't valid, or the person has never talked in all chat before (he/she needs to type something in chat-topia to have a profile created).");
 								
 							}else{
 								
+								//capitalize and space the trophy name
+								let trophyPrint = "";
+								for (let a = 0; a < values.length-2; a++){
+									
+									let temp = values[a+2].toLowerCase();
+									temp = temp.charAt(0).toUpperCase() + temp.slice(1);
+									
+									trophyPrint += temp;
+									if (a != values.length-3){
+										trophyPrint += " ";
+									}
+								}
+							
+								
 								let userTrophies = data.Item.trophies;
 								console.log(userTrophies);
 								//check whether or not the user already has the trophy
-								if (userTrophies.indexOf(values[2].toLowerCase()) > -1){
+								if (userTrophies.indexOf(trophy.toLowerCase()) > -1){
 									
-									message.reply("This user already has the " + values[2] + " trophy.");
+									message.reply("This user already has the " + trophyPrint + " trophy.");
 									
 								}else{
 									
 									
-									userTrophies.push(values[2].toLowerCase());
+									userTrophies.push(trophy.toLowerCase());
 									let updatedUser = {
 										TableName:"discordBot",
 										Key:{
@@ -320,8 +398,12 @@ client.on('message', function(message) {
 											message.reply("Trophy successfully granted! :smiley:");
 											console.log(client.users.get(values[1]));
 											console.log(data);
+											
+											
+											
+											
 											//broadcast the good news
-											//client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2].toLowerCase() + " trophy!");
+											client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + values[2] + " trophy!");
 										}
 									});
 										
@@ -339,11 +421,17 @@ client.on('message', function(message) {
 				
 				
 			//remove a user's trophy	
-			}else if(message.content.toLowerCase().substring(0, 7) === '!remove' && values.length === 3){
+			}else if(message.content.toLowerCase().substring(0, 13) === '!removetrophy'){
 				let values = message.content.split(" ");
 				console.log(values);
+				
+				let trophy = "";
+				for (let a = 0; a < values.length-2; a++){
+					trophy += values[a+2];
+				}
+				
 				//check if trophy is valid, otherwise just restart
-				if (botConstants.trophyList.indexOf(values[2].toLowerCase()) > -1){
+				if (botConstants.trophyList.indexOf(trophy.toLowerCase()) > -1){
 				
 					let params = {
 						TableName: "discordBot",
@@ -370,8 +458,21 @@ client.on('message', function(message) {
 								let userTrophies = data.Item.trophies;
 								console.log(userTrophies);
 								
-								let index = userTrophies.indexOf(values[2].toLowerCase());
+								let index = userTrophies.indexOf(trophy.toLowerCase());
 								
+								//capitalize and space the trophy name
+								let trophyPrint = "";
+								for (let a = 0; a < values.length-2; a++){
+									
+									let temp = values[a+2].toLowerCase();
+									temp = temp.charAt(0).toUpperCase() + temp.slice(1);
+									
+									trophyPrint += temp;
+									if (a != values.length-3){
+										trophyPrint += " ";
+									}
+								}
+							
 								//check whether or not the user already has the trophy
 								if (index > -1){
 									
@@ -399,13 +500,14 @@ client.on('message', function(message) {
 												
 												
 												console.log("Successfully updated", JSON.stringify(data, null, 2));
-												message.reply("Trophy successfully removed.");
+												message.reply("The " + trophyPrint + " trophy has been successfully removed.");
 												
 											}
 										});
 									
 								}else{
-									message.reply("This user does not have the " + values[2] + " trophy.");
+														
+									message.reply("This user does not have the " + trophyPrint + " trophy.");
 									
 									
 										
@@ -418,6 +520,157 @@ client.on('message', function(message) {
 				}
 			}else if (message.content.toLowerCase() === '!trophyshortcuts'){
 				message.author.sendMessage(botConstants.shortcuts);
+			
+			}else if (message.content.toLowerCase().substring(0, 10) === "!givecoins" && values.length === 3){
+						
+				console.log(values);
+			
+				let params = {
+					TableName: "discordBot",
+					Key:{
+						"userID": values[1]
+					}
+				};
+
+				docClient.get(params, function(err, data) {
+					if (err) {
+						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+						message.reply("Error :/ Please contact Zeb about this");
+					} else {
+						
+						console.log(data.Item);
+						
+						if (data.Item == undefined){
+									
+							message.reply(" The ID you included either isn't valid, or the person has never talked in all chat before (he/she needs to type something in chat-topia to have a profile created).");
+							
+						}else{
+							
+							let coinValue = parseInt(values[2]);
+							
+							if (isNaN(coinValue)){
+								message.reply(" Invalid coin value.");
+								
+							}else{
+							
+							let userCoins = 0;
+							
+							if (data.Item.coins == undefined){
+								userCoins = coinValue;
+							}else{
+								userCoins = data.Item.coins + coinValue;
+							}
+						
+								let updatedUser = {
+									TableName:"discordBot",
+									Key:{
+										"userID": values[1]
+									},
+									UpdateExpression: "set coins = :c",
+									ExpressionAttributeValues:{
+										":c":userCoins
+									},
+									ReturnValues:"UPDATED_NEW"
+								};
+								
+								
+								docClient.update(updatedUser, function(err, data) {
+									if (err) {
+										console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+									//	message.reply("Error :/ Please contact Zeb about this");
+									} else {
+										
+										
+										console.log("Successfully updated", JSON.stringify(data, null, 2));
+										message.reply("Coins successfully granted! :smiley:");
+										console.log(client.users.get(values[1]));
+										console.log(data);
+									}
+								});
+									
+							}
+							
+									
+								
+						}
+					}
+				});
+				
+			}else if(message.content.toLowerCase().substring(0, 12) === "!removecoins" && values.length === 3){
+						
+				console.log(values);
+			
+				let params = {
+					TableName: "discordBot",
+					Key:{
+						"userID": values[1]
+					}
+				};
+
+				docClient.get(params, function(err, data) {
+					if (err) {
+						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+						message.reply("Error :/ Please contact Zeb about this");
+					} else {
+						
+						console.log(data.Item);
+						
+						if (data.Item == undefined){
+									
+							message.reply(" The ID you included either isn't valid, or the person has never talked in all chat before (he/she needs to type something in chat-topia to have a profile created).");
+							
+						}else{
+							
+							let coinValue = parseInt(values[2]);
+							
+							if (isNaN(coinValue)){
+								message.reply(" Invalid coin value.");
+								
+							}else{
+								
+								let userCoins = data.Item.coins;
+								
+								if (coinValue >= userCoins){
+									userCoins = 0;
+								}else{
+									userCoins -= coinValue;
+								}
+								
+						
+								let updatedUser = {
+									TableName:"discordBot",
+									Key:{
+										"userID": values[1]
+									},
+									UpdateExpression: "set coins = :c",
+									ExpressionAttributeValues:{
+										":c":userCoins
+									},
+									ReturnValues:"UPDATED_NEW"
+								};
+								
+								
+								docClient.update(updatedUser, function(err, data) {
+									if (err) {
+										console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+										message.reply("Error :/ Please contact Zeb about this");
+									} else {
+										
+										
+										console.log("Successfully updated", JSON.stringify(data, null, 2));
+										message.reply("Coins successfully subtracted!");
+										console.log(client.users.get(values[1]));
+										console.log(data);
+									}
+								});
+									
+							}
+							
+									
+								
+						}
+					}
+				});
 			}
 				
 		}
@@ -456,7 +709,8 @@ client.on('message', function(message) {
 									"userID": message.author.id,
 									"lvl": 0,
 									"exp": 0,
-									"trophies": []
+									"trophies": [],
+									"coins": 0
 								}
 							}
 							
@@ -474,14 +728,16 @@ client.on('message', function(message) {
 							let exp = message.content.length + curUser.exp;
 							let lvl = curUser.lvl;
 							let userTrophies = curUser.trophies;
+							let temp = 0;
 							while (exp >= levelUpReq[lvl]){
-								message.channel.startTyping();
+								temp = 1;
+								//message.channel.startTyping();
 								console.log("Level up!");
 								lvl++;
 								
 								let random = Math.floor(Math.random()*5);
 								
-								
+								/*
 								if (message.author.id.localeCompare(owner) === 0){
 									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
 									
@@ -495,6 +751,7 @@ client.on('message', function(message) {
 									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
 								}
 								
+								*/
 								if (lvl == 10){
 									userTrophies.push("bronze");
 									message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
@@ -508,6 +765,7 @@ client.on('message', function(message) {
 									message.channel.sendMessage(message.author.username + " also earned a gold trophy! Congratulations!");
 									
 								}else if (lvl == 40){
+									
 									userTrophies.push("bronze");
 									message.channel.sendMessage(message.author.username + " also earned a bronze trophy! Congratulations!");
 									
@@ -517,7 +775,23 @@ client.on('message', function(message) {
 									
 								}
 								
-								message.channel.stopTyping(true);
+								//delete this after a few days or something
+							if (temp == 1){
+								if (message.author.id.localeCompare(owner) === 0){
+									message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
+									
+								}else if (message.author.id.localeCompare(userSushi) === 0){
+									message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
+									
+								}else if (message.author.id.localeCompare(userYang) === 0){
+									message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
+								
+								}else{
+									message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
+								}
+							}
+								
+							//	message.channel.stopTyping(true);
 							}
 								
 							
