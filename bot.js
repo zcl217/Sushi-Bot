@@ -309,7 +309,7 @@ client.on('message', function(message) {
 			message.channel.stopTyping(true);
 			
 		//only admins can give/remove stuff	
-		}else if (message.content.substring(0, 1) === "!" && (message.author.id === userSushi || message.author.id === owner)){
+		}else if (message.content.substring(0, 1) === "!" && (message.author.id === userSushi || message.author.id === owner || message.author.id === userYang)){
 			
 			let values = message.content.split(" ");
 			
@@ -406,7 +406,8 @@ client.on('message', function(message) {
 											
 											//broadcast the good news
 											message.reply("Congratulations! " + client.users.get(values[1]) + " just earned the " + trophyPrint + " trophy!");
-											//client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + trophyPrint + " trophy!");
+											
+											client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + trophyPrint + " trophy!");
 										}
 									});
 										
@@ -679,12 +680,12 @@ client.on('message', function(message) {
 				});
 			}
 				
-		}
-		
-		
+		}else	
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
-			message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
+			message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. My functions will only work in the main chat :^)");
+			
+			//message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 			
 		} else if (message.channel.id.localeCompare(channel) === 0 || message.channel.id.localeCompare(test) === 0 || message.channel.id.localeCompare(gameChannel) === 0){
 		//}else if (message.content === 'ultra secret command'){	
@@ -738,6 +739,8 @@ client.on('message', function(message) {
 							let exp = message.content.length + curUser.exp;
 							let lvl = curUser.lvl;
 							let userTrophies = curUser.trophies;
+							console.log("TROPHIES HEREEEEEEEEEEE");
+							console.log(curUser.trophies);
 							let temp = 0;
 							while (exp >= levelUpReq[lvl]){
 								temp = 1;
