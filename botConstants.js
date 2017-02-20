@@ -2,7 +2,7 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:"];
+const face = [":muscle: :alien:", ":hear_no_evil:", ":grinning:", ":smiley:", ":hugging:", ":scream_cat:", ":heart_eyes_cat:", ":up:", ":cool:", ":lifter:"];
 
 const sushi = [
 	"Here is a delicious California Sushi roll at your service!",
@@ -63,7 +63,7 @@ const commands = "You requested the commands? Here is a list of all the function
 			" 4) **!level** : Displays your current level (exp gained through typing in chat-topia)\n\n" +
 			" 5) **!commands** :^)\n\n" +
 			" 6) **!trophies** : Displays all the trophies you currently possess\n\n" +
-			" 7) **!trophyList** : Displays a list of all available trophies and their respective description\n\n";
+			" 7) **!trophiesOther** : Displays all the trophies another user possesses.\n\n\tHOW TO USE:\n\tThe format is: ```diff\n!trophiesOther <userID>```\n For example: !trophiesOther 123456789\n\tIf you don't know how to find the ID of a user, type \"how to find id\" (no quotes) in this chat (this private chat).\n\n";
 			//" 8) **!coins** : Displays the current amount of coins you possess.\n\n";
 
 /* const shortcuts = "List of short names for the trophies:\n"+

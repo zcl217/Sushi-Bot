@@ -251,6 +251,66 @@ client.on('message', function(message) {
 			
 			message.channel.stopTyping(true);
 			
+		}else if (message.content.toLowerCase().substring(0, 14) === "!trophiesother"){
+			
+			message.channel.startTyping();
+			let values = message.content.split(" ");
+			
+			if (values.length !== 2){
+				message.reply("Format incorrect. (format is !trophiesOther <userID>)");
+			}else{
+				
+				
+				
+				let params = {
+					TableName: "discordBot",
+					Key:{
+						"userID": values[1]
+					}
+				};
+
+				//look up a user's trophy list. if the user never talked before, create new entry
+				docClient.get(params, function(err, dataTrophy) {
+					if (err) {
+						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+						message.reply("Error :/ Please contact Zeb about this");
+					} else {
+						console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
+						console.log(dataTrophy.Item);
+
+						if (dataTrophy.Item == undefined){
+										
+								message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
+						}else{
+							
+							//emojis is a collection, so use .find to get the emoji object
+							//alternatively, you can use 'get' to find via ID
+							//message.reply(client.emojis.find('name', 'bronze'));
+							let trophies = "";
+							
+							dataTrophy.Item.trophies.forEach(trophy =>{
+								trophies += client.emojis.find('name', trophy);
+							});
+							
+							if (trophies === ""){
+								message.channel.send(client.users.get(values[1]).username + " currently has no trophies.");
+							}else{
+								console.log(typeof(trophies));
+								console.log(typeof(client.users.get(values[1])));
+								console.log(client.users.get(values[1]));
+								message.channel.send("Here is a list of " + client.users.get(values[1]).username + "'s trophies:\n " + trophies);
+							}
+						}
+						
+					}
+				});
+				
+				
+			}
+			
+			message.channel.stopTyping(true);
+			
+			
 		//tell the user how many coins they have
 		}else if (message.content.toLowerCase() === "!coinsA"){
 				
@@ -405,7 +465,7 @@ client.on('message', function(message) {
 											
 											
 											//broadcast the good news
-											message.reply("Congratulations! " + client.users.get(values[1]) + " just earned the " + trophyPrint + " trophy!");
+											message.reply("Congratulations! " + client.users.get(values[1]).username + " just earned the " + trophyPrint + " trophy!");
 											
 											client.channels.get(newsAndEvents).sendMessage("Congratulations! " + client.users.get(values[1]) + " just earned the " + trophyPrint + " trophy!");
 										}
@@ -683,7 +743,11 @@ client.on('message', function(message) {
 		}else	
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
-			message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. My functions will only work in the main chat :^)");
+			if (message.content.toLowerCase() === "how to find id"){
+				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+			}else{
+				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"how to find id\" (no quotes and not case sensitive) :^)");
+			}
 			
 			//message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
 			
@@ -748,7 +812,7 @@ client.on('message', function(message) {
 								console.log("Level up!");
 								lvl++;
 								
-								let random = Math.floor(Math.random()*5);
+								let random = Math.floor(Math.random()*10);
 								
 								
 								if (message.author.id.localeCompare(owner) === 0){
