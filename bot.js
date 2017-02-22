@@ -69,8 +69,8 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.username}!`);
 });
 
-client.on('guildMemberAdd', () =>{
-	client.channels.get(channel).sendMessage("Welcome to the server!");
+client.on('guildMemberAdd', (guildMember) =>{
+	client.channels.get(channel).sendMessage("Welcome to the server, " + guildMember.user.username + "! :hugging:");
 });
 
 
@@ -93,30 +93,6 @@ client.on('message', function(message) {
 			
 			//PM the user the commands
 			message.author.sendMessage(botConstants.commands);
-			//" 7) **!trophyList** : Displays all available trophies");
-		
-		}else if (message.content.toLowerCase() === '!trophylist'){
-		
-			//PM the user the list of trophies
-			//message.author.sendMessage(botConstants.trophies);
-			//message.channel.sendMessage(botConstants.trophies))
-			
-			message.channel.sendMessage("You desire to see the list of wonderful trophies in store? Seek no further:\n\n" +
-			
-			" 1) " + client.emojis.find('name', 'bronze') + " The bronze trophy is granted upon reaching level 10.\n\n" +
-			" 2) " + client.emojis.find('name', 'silver') + " The silver trophy is  granted upon reaching level 20.\n\n" +
-			" 3) " + client.emojis.find('name', 'gold') + " The gold trophy is granted upon reaching level 30.\n\n" + 
-			// waiting for the 4th trophy
-			" 4) " + "" + "The ? trophy is granted upon reaching level 40.\n\n" +
-			" 5) " + client.emojis.find('name', 'master') + " The master trophy is granted upon reaching level 50.\n\n" +
-			" 6) " + client.emojis.find('name', 'od') + " Overwhelming Dedication - Only those whose contributed to the community with flying colors, will be able to receive this trophy. Taking part in the community activities and events boost up your goal a lot. Taking part in voice calls and community discussions is an excellent way to achieve Overwhelming Dedication.\n\n" +
-			" 7) " + client.emojis.find('name', 'ht') + " Hand Triumph - This is earned by creating your own unique art style that is perfectly refined and interesting. Only those who are skilled in multiple fields can obtain this trophy. This is analyzed from shading through anatomy and more.\n\n" +
-			" 8) " + client.emojis.find('name', 'brush') + " Brush Utopia - This trophy is individually selected by KnockoutSushi for creating an amazing digital painting that meets his 10/10 standards.\n\n" +
-			" 9) " + client.emojis.find('name', 'dc') + ` Division Conqueror - For those who have contributed to a division within ${client.channels.get("267682600192180224")} and stays consistent with the designated task for that particular role.\n\n` +
-			" 10) " + client.emojis.find('name', 'fa') + " Flashy Assault - Those who participated and won in a Fighting Game Tournament will earn this Trophy!\n\n" +
-			" 11) " + client.emojis.find('name', 'wi') + " Warm Introduction - This achievement is gained from always staying on top of welcoming members to make them feel more comfortable and apart of Hangout Utopia.\n\n" +
-			" 12) " + client.emojis.find('name', 'crest') + " Dueler's Crest - This achievement is given to the dedicated pro gamers of Hangout Utopia who has won 3 or more Game Tournaments hosted by our community.\n\n"); 
-
 			
 		}else if (message.content.toLowerCase() === '!fun fact'){
 			
@@ -175,9 +151,9 @@ client.on('message', function(message) {
 										console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
 									}
 								});
-								message.reply("You are currently a level 0 :sushi:");
+								message.channel.send(message.author.username + " is currently a level 0 :sushi:");
 					}else{
-						message.reply("You are currently a level " + data.Item.lvl + " :sushi:");
+						message.channel.send(message.author.username + " is currently a level " + data.Item.lvl + " :sushi:");
 					}
 				}
 			});
@@ -226,7 +202,7 @@ client.on('message', function(message) {
 										console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
 									}
 								});
-								message.reply("You currently have no trophies.");
+								message.channel.send(message.author.username + " currently has no trophies.");
 					}else{
 						
 						//emojis is a collection, so use .find to get the emoji object
@@ -239,11 +215,12 @@ client.on('message', function(message) {
 						});
 						
 						if (trophies === ""){
-							message.reply("You currently have no trophies.");
+							message.channel.send(message.author.username + " currently has no trophies.");
 						}else{
 							console.log(typeof(trophies));
 							
-							message.reply(trophies);
+							message.channel.send("Here is your list of trophies. :heart_eyes_cat:");
+							message.channel.send(trophies);
 						}
 					}
 				}
@@ -260,50 +237,60 @@ client.on('message', function(message) {
 				message.reply("Format incorrect. (format is !trophiesOther <userID>)");
 			}else{
 				
+				//do client.users.get(values[1]) and see what we get
+				//(if it doesn't exist, do we get undefined?)
 				
+				if (client.users.get(values[1]) == undefined){
+					message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
+					
+					message.channel.stopTyping(true);
+					
+				}else{
 				
-				let params = {
-					TableName: "discordBot",
-					Key:{
-						"userID": values[1]
-					}
-				};
-
-				//look up a user's trophy list. if the user never talked before, create new entry
-				docClient.get(params, function(err, dataTrophy) {
-					if (err) {
-						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-						message.reply("Error :/ Please contact Zeb about this");
-					} else {
-						console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
-						console.log(dataTrophy.Item);
-
-						if (dataTrophy.Item == undefined){
-										
-								message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
-						}else{
-							
-							//emojis is a collection, so use .find to get the emoji object
-							//alternatively, you can use 'get' to find via ID
-							//message.reply(client.emojis.find('name', 'bronze'));
-							let trophies = "";
-							
-							dataTrophy.Item.trophies.forEach(trophy =>{
-								trophies += client.emojis.find('name', trophy);
-							});
-							
-							if (trophies === ""){
-								message.channel.send(client.users.get(values[1]).username + " currently has no trophies.");
-							}else{
-								console.log(typeof(trophies));
-								console.log(typeof(client.users.get(values[1])));
-								console.log(client.users.get(values[1]));
-								message.channel.send("Here is a list of " + client.users.get(values[1]).username + "'s trophies:\n " + trophies);
-							}
+					let params = {
+						TableName: "discordBot",
+						Key:{
+							"userID": values[1]
 						}
-						
-					}
-				});
+					};
+
+					//look up a user's trophy list. if the user never talked before, create new entry
+					docClient.get(params, function(err, dataTrophy) {
+						if (err) {
+							console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+							message.reply("Error :/ Please contact Zeb about this");
+						} else {
+							console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
+							console.log(dataTrophy.Item);
+
+							if (dataTrophy.Item == undefined){
+											
+									message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
+							}else{
+								
+								//emojis is a collection, so use .find to get the emoji object
+								//alternatively, you can use 'get' to find via ID
+								//message.reply(client.emojis.find('name', 'bronze'));
+								let trophies = "";
+								
+								dataTrophy.Item.trophies.forEach(trophy =>{
+									trophies += client.emojis.find('name', trophy);
+								});
+								
+								if (trophies === ""){
+									message.channel.send(client.users.get(values[1]).username + " currently has no trophies.");
+								}else{
+									console.log(typeof(trophies));
+									console.log(typeof(client.users.get(values[1])));
+									console.log(client.users.get(values[1]));
+									message.channel.send("Here is a list of " + client.users.get(values[1]).username + "'s trophies:");
+									message.channel.send(trophies);
+								}
+							}
+							
+						}
+					});
+				}
 				
 				
 			}
@@ -566,7 +553,7 @@ client.on('message', function(message) {
 												
 												console.log(data);
 												console.log("Successfully updated (trophy removed)", JSON.stringify(data, null, 2));
-												message.reply("The " + trophyPrint + " trophy has been successfully removed.");
+												message.channel.send("The " + trophyPrint + " trophy has been successfully removed.");
 												
 											}
 										});
@@ -744,7 +731,7 @@ client.on('message', function(message) {
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
 			if (message.content.toLowerCase() === "how to find id"){
-				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
 			}else{
 				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"how to find id\" (no quotes and not case sensitive) :^)");
 			}
