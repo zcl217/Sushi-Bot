@@ -230,67 +230,76 @@ client.on('message', function(message) {
 			
 		}else if (message.content.toLowerCase().substring(0, 14) === "!trophiesother"){
 			
-			message.channel.startTyping();
+			let user = client.users.find("username", message.content.substring(message.content.indexOf(" ")+1));
+			let userID = "";
+			
 			let values = message.content.split(" ");
 			
-			if (values.length !== 2){
-				message.reply("Format incorrect. (format is !trophiesOther <userID>)");
+			message.channel.startTyping();
+			
+			if (user == null){
+				
+				userID = values[1];
+				
 			}else{
+				userID = user.id;
 				
-				//do client.users.get(values[1]) and see what we get
-				//(if it doesn't exist, do we get undefined?)
+				//if the person opts to search by username and not by ID, then we still pretend they searched
+				//by ID to make checking valid IDs easier
+				values[1] = userID;
+			}
+			
+			if (client.users.get(values[1]) == undefined){
+				message.reply(" Invalid ID/username. Please make sure you wrote it correctly (or maybe their username is not the same as their nickname :sushi:).");
 				
-				if (client.users.get(values[1]) == undefined){
-					message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
-					
-					message.channel.stopTyping(true);
-					
-				}else{
+				message.channel.stopTyping(true);
 				
-					let params = {
-						TableName: "discordBot",
-						Key:{
-							"userID": values[1]
-						}
-					};
+			}else{
+			
+				let params = {
+					TableName: "discordBot",
+					Key:{
+						"userID": userID
+					}
+				};
 
-					//look up a user's trophy list. if the user never talked before, create new entry
-					docClient.get(params, function(err, dataTrophy) {
-						if (err) {
-							console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
-							message.reply("Error :/ Please contact Zeb about this");
-						} else {
-							console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
-							console.log(dataTrophy.Item);
+				//search for target user's trophylist
+				docClient.get(params, function(err, dataTrophy) {
+					if (err) {
+						console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+						message.reply("Error :/ Please contact Zeb about this");
+					} else {
+						console.log("GetItem succeeded:", JSON.stringify(dataTrophy, null, 2));
+						console.log(dataTrophy.Item);
 
-							if (dataTrophy.Item == undefined){
-											
-									message.reply(" Invalid ID. Please make sure you pasted the correct ID.");
-							}else{
-								
-								//emojis is a collection, so use .find to get the emoji object
-								//alternatively, you can use 'get' to find via ID
-								//message.reply(client.emojis.find('name', 'bronze'));
-								let trophies = "";
-								
-								dataTrophy.Item.trophies.forEach(trophy =>{
-									trophies += client.emojis.find('name', trophy);
-								});
-								
-								if (trophies === ""){
-									message.channel.send(client.users.get(values[1]).username + " currently has no trophies.");
-								}else{
-									console.log(typeof(trophies));
-									console.log(typeof(client.users.get(values[1])));
-									console.log(client.users.get(values[1]));
-									message.channel.send("Here is a list of " + client.users.get(values[1]).username + "'s trophies:");
-									message.channel.send(trophies);
-								}
-							}
+						if (dataTrophy.Item == undefined){
+										
+								message.reply(" Invalid ID/username. Please make sure you wrote it correctly (or maybe their username is not the same as their nickname :sushi:).");
+						}else{
 							
+							//emojis is a collection, so use .find to get the emoji object
+							//alternatively, you can use 'get' to find via ID
+							//message.reply(client.emojis.find('name', 'bronze'));
+							let trophies = "";
+							
+							dataTrophy.Item.trophies.forEach(trophy =>{
+								trophies += client.emojis.find('name', trophy);
+							});
+							
+							if (trophies === ""){
+								message.channel.send(client.users.get(values[1]).username + " currently has no trophies.");
+							}else{
+								console.log(typeof(trophies));
+								console.log(typeof(client.users.get(values[1])));
+								console.log(client.users.get(values[1]));
+								message.channel.send("Here is a list of " + client.users.get(values[1]).username + "'s trophies:");
+								message.channel.send(trophies);
+							}
 						}
-					});
-				}
+						
+					}
+				});
+				
 				
 				
 			}
@@ -730,10 +739,13 @@ client.on('message', function(message) {
 		}else	
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
-			if (message.content.toLowerCase() === "how to find id"){
-				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+			if (message.content.toLowerCase() === "searching by id"){
+				message.reply("Hey " + `${message.author.username}` + ", this is how you search by ID.\n" +
+				"**!trophiesOther** : Displays all the trophies another user possesses.\n\nThe format is: ```diff\n!trophiesOther <userID>```\n For example: !trophiesOther 123456789\n\n\n" +
+				"To find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+				
 			}else{
-				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"how to find id\" (no quotes and not case sensitive) :^)");
+				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"searching by id\" (no quotes and not case sensitive) :^)");
 			}
 			
 			//message.reply("(Private) " + `${message.author.username}: ` + " Yo fam I ain't here for your personal service. My functions will only work in the main chat :^)");
