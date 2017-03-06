@@ -740,9 +740,7 @@ client.on('message', function(message) {
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
 			if (message.content.toLowerCase() === "searching by id"){
-				message.reply("Hey " + `${message.author.username}` + ", this is how you search by ID.\n" +
-				"**!trophiesOther** : Displays all the trophies another user possesses.\n\nThe format is: ```diff\n!trophiesOther <userID>```\n For example: !trophiesOther 123456789\n\n\n" +
-				"To find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
 				
 			}else{
 				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"searching by id\" (no quotes and not case sensitive) :^)");
