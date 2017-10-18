@@ -121,7 +121,7 @@ client.on('message', function(message) {
 			//displays the user's level
 			case "!level":
 				
-				getLevel(message);
+				displayLevel(message);
 				break;
 		
 			//displays the user's trophies
@@ -133,6 +133,11 @@ client.on('message', function(message) {
 			case "!coins":
 				coins(message);
 				break;
+				
+			case "!site":
+				displaySite(message);
+				break;
+				
 		}
 		
 		//commands that require getting the substring of the original message
@@ -140,6 +145,14 @@ client.on('message', function(message) {
 			
 			displayTrophiesOther(message);	
 			
+		}else if (message.content.toLowerCase().substring(0, 11) === "!updatesite"){
+			
+			updateSite(message, message.content.split(" "));
+			
+		}else if (message.content.toLowerCase().substring(0, 10) === "!siteother"){
+		
+			siteOther(message, message.content.split(" " ));
+		
 		//only admins can give/remove stuff	
 		}else if (message.content.substring(0, 1) === "!" && (message.author.id === userSushi || message.author.id === owner)){
 			
@@ -189,7 +202,7 @@ client.on('message', function(message) {
 
 
 
-function getLevel(message){
+function displayLevel(message){
 	message.channel.startTyping();
 	
 	let params = {
@@ -412,7 +425,8 @@ function coins(message){
 								"lvl": 0,
 								"exp": 0,
 								"trophies": [],
-								"coins": 0
+								"coins": 0,
+								"site": ""
 							}
 						};
 						
@@ -829,7 +843,8 @@ function giveExp(message){
 						"lvl": 0,
 						"exp": 0,
 						"trophies": [],
-						"coins": 0
+						"coins": 0,
+						"site": ""
 					}
 				};
 				
@@ -866,11 +881,8 @@ function giveExp(message){
 						message.channel.sendMessage("Congratulations master " + message.author.username + ", you just leveled up! (to level " + lvl + ")!");
 						
 					}else if (message.author.id.localeCompare(userSushi) === 0){
-						message.channel.sendMessage("The King of Sushi, KNOCKOUTSUSHI, has just gained yet ANOTHER level :muscle::muscle::muscle:(level " + lvl + ").");
+						message.channel.sendMessage("Your King of Greed Topia has LEVELED UP (level " + lvl + ").");
 						
-					}else if (message.author.id.localeCompare(userYang) === 0){
-						message.channel.sendMessage("Grand Master Yang Lee chops through another level! :ghost: (level " + lvl + ").");
-					
 					}else{
 						message.channel.sendMessage(message.author.username + " just leveled up to level " + lvl + "! " + botConstants.face[random]);
 					}
@@ -931,6 +943,177 @@ function giveExp(message){
 	});
 }
 
+function displaySite(message){
+	let params = {
+		TableName: "discordBot",
+		Key:{
+			"userID": message.author.id
+		}
+	};
+	
+	docClient.get(params, function(err, data) {
+		if (err) {
+			console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+			message.reply("Error :/ Please contact Zeb about this");
+		} else {
+			console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+			console.log(data);
+			
+			if (data.Item == undefined){
+						//create new table entry
+						
+						let newID = {
+							TableName:"discordBot",
+							Item:{
+								"userID": message.author.id,
+								"lvl": 0,
+								"exp": 0,
+								"trophies": [],
+								"coins": 0,
+								"site": ""
+							}
+						};
+						
+						docClient.put(newID, function(err, data){
+							  if (err) {
+								console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+							} else {
+								console.log("Created new table entry for " + message.author.username, JSON.stringify(data, null, 2));
+							}
+						});
+						message.channel.send(message.author.username + " is currently a level 0 :sushi:");
+			}else{
+				
+				if (data.Item.site == "" || data.Item.site == null){
+					message.reply("You haven't set a site yet! Use the !updateSite command if you desire to let me handle your glorious page.");
+				}else{
+					message.channel.send(message.author.username + "'s site: " + data.Item.site);
+				}
+			}
+		}
+	});
+	
+	message.channel.stopTyping(true);
+}
+
+function updateSite(message, values){
+	console.log(values);
+			
+	if (values.length !== 2){
+		message.reply("Invalid format. Format is !updateSite link");
+		return;
+	}	
+	
+	let params = {
+		TableName: "discordBot",
+		Key:{
+			"userID": message.author.id
+		}
+	};
+
+	docClient.get(params, function(err, data) {
+		if (err) {
+			console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+			message.reply("Error :/ Please contact Zeb about this");
+		} else {
+			
+			console.log(data.Item);
+	
+				
+				
+					
+			
+			let updatedUser = {
+				TableName:"discordBot",
+				Key:{
+					"userID": message.author.id
+				},
+				UpdateExpression: "set site = :s",
+				ExpressionAttributeValues:{
+					":s":values[1]
+				},
+				ReturnValues:"UPDATED_NEW"
+			};
+			
+			
+			docClient.update(updatedUser, function(err, data) {
+				if (err) {
+					console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+					message.reply("Error :/ Please contact Zeb about this");
+				} else {
+					
+					
+					console.log("Successfully updated", JSON.stringify(data, null, 2));
+					message.reply("Site successfully updated!");
+					console.log(data);
+				}
+			});
+						
+				
+				
+						
+					
+			
+		}
+	});
+}
+
+function siteOther(message, values){
+	let user = client.users.find("username", message.content.substring(message.content.indexOf(" ")+1));
+	let userID = "";
+	
+	message.channel.startTyping();
+	
+	if (user == null){
+		
+		userID = values[1];
+		
+	}else{
+		userID = user.id;
+		
+		//if the person opts to search by username and not by ID, then we still pretend they searched
+		//by ID to make checking valid IDs easier
+		values[1] = userID;
+	}	
+	
+	let entry = client.users.get(values[1]);
+	if (entry == undefined){
+		message.reply(" Invalid ID/username. Please make sure you wrote it correctly (or maybe their username is not the same as their nickname :sushi:).");
+		
+		message.channel.stopTyping(true);
+		
+	}else{
+	
+		let params = {
+			TableName: "discordBot",
+			Key:{
+				"userID": userID
+			}
+		};
+
+		docClient.get(params, function(err, data) {
+			if (err) {
+				console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+				message.reply("Error :/ Please contact Zeb about this");
+			} else {
+				console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
+				
+				
+				if (data.Item.site == "" || data.Item.site == null){
+					message.reply(entry.username + " hasn't set their website yet.");
+				}else{
+					message.channel.send(entry.username + "'s site: " + data.Item.site);
+				}
+				
+			}
+		});
+		
+		
+		
+	}
+	
+	message.channel.stopTyping(true);
+}
 /*
 client.on('message', function(message) {
 	console.log(client);
