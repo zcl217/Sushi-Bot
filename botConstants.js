@@ -58,12 +58,12 @@ const trophyList = [
 const commands = "You requested the commands? Here is a list of all the functions / commands you can do (none of them are case sensitive).\n\n" +
 			
 			" 1) **!Sushi please** : Gives you a random sushi\n\n"+
-			" 2) **!What is Hangout Utopia?** : Gives you information about the server\n\n" +
+			" 2) **!What is Greed Utopia?** : Gives you information about the server\n\n" +
 			" 3) **!fun fact** : Gives you a random fact\n\n" + 
 			" 4) **!level** : Displays your current level (exp gained through typing in chat-topia)\n\n" +
 			" 5) **!commands** :^)\n\n" +
 			" 6) **!trophies** : Displays all the trophies you currently possess\n\n" +
-			" 7) **!trophiesOther** : Displays all the trophies another user possesses.\n\n\t>HOW TO USE<\nThe format is: ```diff\n!trophiesOther <username>```\n For example: !trophiesOther MangoLover\nPlease keep in mind that the username is case sensitive.\nIf, for some reason, the target's username contains characters you are unable to type, you can also use their ID. To learn how to search by ID, type \"searching by id\" (no quotes) in this chat (this private chat).\nAlso, a user's username could be different from the one the nickname they have in the Hangout Utopia discord chat (in this case, you can either ask for their username, or search by ID).\n\n";
+			" 7) **!trophiesOther** : Displays all the trophies another user possesses.\n\n\t>HOW TO USE<\nThe format is: ```diff\n!trophiesOther <username>```\n For example: !trophiesOther MangoLover\nPlease keep in mind that the username is case sensitive.\nIf, for some reason, the target's username contains characters you are unable to type, you can also use their ID. To learn how to search by ID, type \"searching by id\" (no quotes) in this chat (this private chat).\nAlso, a user's username could be different from the one the nickname they have in the Greed Utopia discord chat (in this case, you can either ask for their username, or search by ID).\n\n";
 			//" 8) **!coins** : Displays the current amount of coins you possess.\n\n";
 
 /* const shortcuts = "List of short names for the trophies:\n"+

@@ -13,18 +13,13 @@ const client = new Discord.Client();
 const botConstants = require("./botConstants.js");
 var mBot = require("discord-music-bot");
 
-var serverName = "Hangout Utopia";
+var serverName = "Greed Utopia";
 var textChannelName = "bot-command-test";
 var voiceChannelName = "ADMIN Meeting";
 var aliasesFile = "aliases";
 var botToken;
 
-AWS.config.update({
-  region: "us-west-2",
-  endpoint: "https://dynamodb.us-west-2.amazonaws.com"
-});
-
-const docClient = new AWS.DynamoDB.DocumentClient()
+var docClient;
 
 //global variables to be read from locally stored json file
 var levelUpReq = [];
@@ -42,17 +37,27 @@ fs.readFile('./json/data.json', {encoding:'utf8'}, function(err, data) {
 		console.log(err);
 	}else{
 		
+		
 		let obj = JSON.parse(data);
 		for (let a = 0; a < 50; a++){
 			levelUpReq[a] = obj[a];
 		}
+
+		AWS.config.update({
+		  region: "us-west-2",
+  		  endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+		 accessKeyId: obj.accessID,
+  		 secretAccessKey: obj.accessKey
+		});
+
+		docClient = new AWS.DynamoDB.DocumentClient();
+
 		owner = obj.owner;
 		channel = obj.chatChannel;
 		newsAndEvents = obj.news;
 		applications = obj.applications;
 		botToken = obj.token;
 		userSushi = obj.sushi;
-		userYang = obj.yang;
 		test = obj.test;
 		gameChannel = obj.game;
 		client.login(obj.token);
@@ -102,12 +107,12 @@ client.on('message', function(message) {
 		
 			message.channel.stopTyping(true);	
 		
-		}else if (message.content.toLowerCase() === "!what is hangout utopia?"){
+		}else if (message.content.toLowerCase() === "!what is greed utopia?"){
 			
 			message.channel.startTyping();
 			
 			//not putting in botconstants because it relies on variables in bot.js and I don't want cyclic dependencies
-			message.reply("Hangout Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\n\n If you'd like to learn more, then check out " + `${client.channels.get(newsAndEvents)}` + " for all the fun activities! If you want to get involved then check out " + `${client.channels.get(applications)}` + ". We have a lot of a roles that you def would be able to apply for!");
+			message.reply("Greed Utopia is a discord server that Supports Gaming and Art, we're a very Active / Friendly community that has a lot of fun events that you can get involved in!\n\n If you'd like to learn more, then check out " + `${client.channels.get(newsAndEvents)}` + " for all the fun activities! If you want to get involved then check out " + `${client.channels.get(applications)}` + ". We have a lot of a roles that you def would be able to apply for!");
 			
 			message.channel.stopTyping(true);
 			
@@ -740,7 +745,7 @@ client.on('message', function(message) {
 		//if the message isn't a pm and is in the correct channel, give them exp
 		if (message.channel.type === "dm") {
 			if (message.content.toLowerCase() === "searching by id"){
-				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Hangout Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
+				message.reply("Hey " + `${message.author.username}` + ", to find someone's ID, follow these three easy steps:\n\n\t1. Press settings (bottom left) and go to appearance.\n\t2. Check the \"Developer Mode\" option.\n\t3. In Greed Utopia, right click a user's username and select \"Copy ID\" (it's the last option).");
 				
 			}else{
 				message.reply("Yo " + `${message.author.username}` + " I ain't here for your personal service. The only function that will work here is \"searching by id\" (no quotes and not case sensitive) :^)");
